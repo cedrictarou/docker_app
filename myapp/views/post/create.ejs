@@ -6,26 +6,24 @@
     <%= title %>
   </title>
   <!-- cssの読み込み -->
-  <%- include('./_share/stylesheets.ejs') %>
+  <%- include('../_share/stylesheets.ejs') %>
 </head>
 
 <body class="d-flex flex-column h-100">
   <header>
-    <%- include('./_share/navbar.ejs') %>
+    <%- include('../_share/navbar.ejs') %>
   </header>
 
   <!-- Begin page content -->
   <main role="main" class="flex-shrink-0">
     <div class="container">
-      <h1>ようこそ、<%= locals.currentUser %>さん</h1>
+      <h1>記事投稿ページ</h1>
 
     </div>
   </main>
 
-  <%- include('./_share/footer.ejs') %>
-    <%- include('./_share/javascripts.ejs') %>
-
-
+  <%- include('../_share/footer.ejs') %>
+    <%- include('../_share/javascripts.ejs') %>
 
 </body>
 

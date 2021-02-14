@@ -8,7 +8,7 @@
   <div class="collapse navbar-collapse" id="navbarCollapse">
     <div class="current-user">
       <p>
-        ようこそ<%= locals.currentUser %>さん
+        ようこそ <%= locals.user %> さん
       </p>
     </div>
     <div class="float-right">
@@ -16,21 +16,21 @@
         <li class="nav-item">
           <a class="nav-link" href="/post/list">みんなの投稿</a>
         </li>
-        <% if ( locals.isLoggedIn ) { %>
+        <% if ( !locals.isLoggedIn ) { %>
           <li class="nav-item">
-            <a class="nav-link" href="/post/create">投稿を作成</a>
+            <a class="nav-link" href="/users/login">Login</a>
           </li>
-          <!-- ユーザーがいる場合だけ表示 -->
           <li class="nav-item">
-            <a class="nav-link" href="/users/logout">Logout</a>
+            <a class="nav-link" href="/users/register">Register</a>
           </li>
           <% } else { %>
             <li class="nav-item">
-              <a class="nav-link" href="/users/login">Login</a>
+              <a class="nav-link" href="/post/create">投稿を作成</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/users/register">Register</a>
-            </li>
+            <!-- loginしている場合だけ表示 -->
+            <form class="form-inline mt-2 mt-md-0" action="/users/logout" method="POST">
+              <input type="submit" class="btn btn-outline-success my-2 my-sm-0" value="Log Out" />
+            </form>
             <% } %>
       </ul>
     </div>

@@ -1,38 +1,16 @@
 // ユーザーログインやサインアップ、ログアウトの管理
 const connection = require('../config/mysql.config');
+const bcrypt = require('bcryptjs');
 
 module.exports = {
   goToLoginPage: (req, res) => {
-    res.render('account/login.ejs', { title: 'login' });
+    res.render('account/login.ejs', {
+      title: 'login',
+      message: req.flash('message'),
+    });
   },
   goToSignupPage: (req, res) => {
     res.render('account/register.ejs', { title: 'register' });
-  },
-  doLogin: (req, res, next) => {
-    const currentUser = {
-      email: req.body.email,
-      password: req.body.password,
-    };
-    // loginチェック
-    connection.query(
-      'SELECT * FROM users WHERE email=?',
-      [currentUser.email],
-      (error, results) => {
-        if (results.length > 0) {
-          if (req.body.password === results[0].password) {
-            // ユーザーIDをセッション情報に保存
-            req.session.userId = results[0].id;
-            req.session.username = results[0].name;
-            res.redirect('/post/list');
-          } else {
-            // パスワードが違うなら
-            res.redirect('/users/login');
-          }
-        } else {
-          res.redirect('/users/login');
-        }
-      }
-    );
   },
   doCheckUser: (req, res, next) => {
     // ユーザーが既に登録されているかをチェックする
@@ -62,17 +40,28 @@ module.exports = {
       }
     );
   },
-  doSignup: (req, res, next) => {
+  doSignup: async (req, res, next) => {
     // 未登録の処理なのでDBに新規ユーザーを追加する
-    connection.query(
-      'INSERT INTO users (name, email, password) VALUES(?,?,?)',
-      [currentUser.username, currentUser.email, currentUser.password],
-      (error, results) => {
-        req.session.userId = results.insertId;
-        req.session.username = currentUser.username;
-        res.redirect('/post/list');
-      }
-    );
+    const currentUser = {
+      username: req.body.userName,
+      email: req.body.email,
+      password: req.body.password,
+    };
+    try {
+      const hashedPassword = await bcrypt.hash(currentUser.password, 10);
+      console.log(hashedPassword);
+      connection.query(
+        'INSERT INTO users (name, email, password) VALUES(?,?,?)',
+        [currentUser.username, currentUser.email, hashedPassword],
+        (error, results) => {
+          // authenticate(login)の処理に移動する
+          next();
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      res.redirect('/users/register');
+    }
   },
   doLogout: (req, res, next) => {
     req.session.destroy((error) => {

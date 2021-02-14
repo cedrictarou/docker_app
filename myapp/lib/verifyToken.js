@@ -1,10 +1,9 @@
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'secretkey';
 
 module.exports = {
   createToken: (req, res, next) => {
     const user = { name: req.session.username };
-    const token = jwt.sign(user, SECRET_KEY);
+    const token = jwt.sign(user, process.env.SECRET_KEY);
     req.session.accessToken = token;
     next();
   },
@@ -12,7 +11,7 @@ module.exports = {
     // トークンの取得
     const accessToken = req.session.accessToken;
     // トークンの検証
-    jwt.verify(accessToken, SECRET_KEY, (err, user) => {
+    jwt.verify(accessToken, process.env.SECRET_KEY, (err, user) => {
       if (err) {
         console.log(err);
         res.redirect('/users/login');
@@ -21,8 +20,5 @@ module.exports = {
         next();
       }
     });
-  },
-  test: (req, res, next) => {
-    console.log(res);
   },
 };

@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const validate = require('../lib/validate');
 const auth = require('../lib/verifyToken');
+const { authenticate } = require('../lib/passport-config');
 
 //register
 router.get('/register', userController.goToSignupPage);
@@ -12,17 +13,18 @@ router.post(
   '/register',
   validate.validatedItems,
   validate.doShowErrorMsg,
-  userController.doCheckUser,
   auth.createToken,
-  userController.doSignup
+  userController.doCheckUser,
+  userController.doSignup,
+  authenticate()
 );
 
 //loginページ
 router.get('/login', userController.goToLoginPage);
 
 // login処理
-router.post('/login', auth.createToken, userController.doLogin);
+router.post('/login', auth.createToken, authenticate());
 
 // logout処理
-router.get('/logout', userController.doLogout);
+router.post('/logout', userController.doLogout);
 module.exports = router;

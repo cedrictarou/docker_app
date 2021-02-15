@@ -49,7 +49,6 @@ module.exports = {
     };
     try {
       const hashedPassword = await bcrypt.hash(currentUser.password, 10);
-      console.log(hashedPassword);
       connection.query(
         'INSERT INTO users (name, email, password) VALUES(?,?,?)',
         [currentUser.username, currentUser.email, hashedPassword],

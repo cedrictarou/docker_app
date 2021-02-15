@@ -1,0 +1,38 @@
+<!-- Fixed navbar -->
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <a class="navbar-brand" href="/">Node.課題４</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarCollapse">
+    <div class="current-user">
+      <p>
+        ようこそ <%= locals.user %> さん
+      </p>
+    </div>
+    <div class="float-right">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/post/list">みんなの投稿</a>
+        </li>
+        <% if ( !locals.isLoggedIn ) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/users/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/users/register">Register</a>
+          </li>
+          <% } else { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/post/create">投稿を作成</a>
+            </li>
+            <!-- loginしている場合だけ表示 -->
+            <form class="form-inline mt-2 mt-md-0" action="/users/logout" method="POST">
+              <input type="submit" class="btn btn-outline-success my-2 my-sm-0" value="Log Out" />
+            </form>
+            <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

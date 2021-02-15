@@ -1,23 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const db = require('mysql2');
+const userController = require('../controllers/userController');
+const validate = require('../lib/validate');
+const auth = require('../lib/verifyToken');
+const { authenticate } = require('../lib/passport-config');
 
-const connection = db.createConnection({
-  host: 'mydb',
-  user: 'root',
-  password: 'root',
-  database: 'test_db',
-});
-connection.connect((err) => {
-  if (err) {
-    console.log('error connecting: ' + err.stack);
-    return;
-  }
-  console.log('success');
-});
-/* GET users listing. */
-router.get('/', function (req, res, next) {
-  res.send('respond with a resource');
-});
+//register
+router.get('/register', userController.goToSignupPage);
 
+// DBへ登録する処理
+router.post(
+  '/register',
+  validate.validatedItems,
+  validate.doShowErrorMsg,
+  auth.createToken,
+  userController.doCheckUser,
+  userController.doSignup,
+  authenticate()
+);
+
+//loginページ
+router.get('/login', userController.goToLoginPage);
+
+// login処理
+router.post('/login', auth.createToken, authenticate());
+
+// logout処理
+router.post('/logout', userController.doLogout);
 module.exports = router;

@@ -1,11 +1,11 @@
 // DBの設定
-const db = require('mysql2');
+// const db = require('mysql2');
 
-const connection = db.createConnection({
-  host: process.env.HOST,
-  user: process.env.USER,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE,
-});
+// const connection = db.createConnection({
+//   host: process.env.HOST,
+//   user: process.env.USER,
+//   password: process.env.PASSWORD,
+//   database: process.env.DATABASE,
+// });
 
-module.exports = connection;
+// module.exports = connection;

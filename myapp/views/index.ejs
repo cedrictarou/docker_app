@@ -17,14 +17,12 @@
   <!-- Begin page content -->
   <main role="main" class="flex-shrink-0">
     <div class="container">
-      <h1>ようこそ、<%= name %>さん</h1>
-
+      <h1>ようこそ、<%= locals.user %>さん</h1>
     </div>
   </main>
 
   <%- include('./_share/footer.ejs') %>
     <%- include('./_share/javascripts.ejs') %>
-
 
 
 </body>

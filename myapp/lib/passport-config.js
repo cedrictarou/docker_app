@@ -9,9 +9,8 @@ passport.serializeUser((email, done) => {
 });
 
 passport.deserializeUser(async (email, done) => {
-  let user;
   try {
-    user = await User.findOne({ where: { email: email } });
+    const user = await User.findOne({ where: { email } });
     // ユーザーを正しく取得できた
     done(null, user);
   } catch (error) {

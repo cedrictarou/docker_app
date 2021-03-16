@@ -1,4 +1,4 @@
-const connection = require('../config/mysql.config');
+const User = require('../models').User;
 const bcrypt = require('bcryptjs');
 
 const passport = require('passport');
@@ -8,19 +8,14 @@ passport.serializeUser((email, done) => {
   done(null, email);
 });
 
-passport.deserializeUser((email, done) => {
-  connection.query(
-    'SELECT * FROM users WHERE email=?',
-    [email],
-    (error, results) => {
-      if (results.length > 0) {
-        // ユーザーを正しく取得できた
-        done(null, results[0]);
-      } else {
-        done(null, error);
-      }
-    }
-  );
+passport.deserializeUser(async (email, done) => {
+  try {
+    const user = await User.findOne({ where: { email } });
+    // ユーザーを正しく取得できた
+    done(null, user);
+  } catch (error) {
+    done(null, error);
+  }
 });
 
 passport.use(
@@ -31,36 +26,32 @@ passport.use(
       passwordField: 'password',
       passReqToCallback: true,
     },
-    (req, email, password, done) => {
-      connection.query(
-        'SELECT * FROM users WHERE email=?',
-        [email],
-        async (error, results) => {
-          if (results.length > 0) {
-            const user = results[0];
-            // hash化されたパスワードが一致するかチェックする
-            if (await bcrypt.compare(password, user.password)) {
-              // ユーザーを正しく取得できた場合
-              req.session.username = user.name;
-              return done(null, user.email);
-            } else {
-              // パスワードが一致しない場合
-              return done(
-                null,
-                false,
-                req.flash('message', 'ユーザー名またはパスワードが違います')
-              );
-            }
-          } else {
-            // 入力情報に誤りがある場合
-            return done(
-              null,
-              false,
-              req.flash('message', 'ユーザー名またはパスワードが違います')
-            );
-          }
+    async (req, email, password, done) => {
+      let user;
+      try {
+        user = await User.findOne({ where: { email: email } });
+        // hash化されたパスワードが一致するかチェックする
+        if (await bcrypt.compare(password, user.password)) {
+          // ユーザーを正しく取得できた場合
+          req.session.username = user.username;
+          return done(null, user.email);
+        } else {
+          // パスワードが一致しない場合
+          return done(
+            null,
+            false,
+            req.flash('error', 'ユーザー名またはパスワードが違います')
+          );
         }
-      );
+      } catch (error) {
+        console(error);
+        // 入力情報に誤りがある場合
+        return done(
+          null,
+          false,
+          req.flash('error', 'ユーザー名またはパスワードが違います')
+        );
+      }
     }
   )
 );
@@ -71,7 +62,7 @@ const initialize = () => {
     passport.session(),
     function (req, res, next) {
       if (req.user) {
-        res.locals.user = req.user.name;
+        res.locals.user = req.user.username;
         res.locals.isLoggedIn = true;
       } else {
         res.locals.user = 'ゲストユーザー';

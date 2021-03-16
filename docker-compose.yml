@@ -3,13 +3,11 @@ version: '3.4'
 services:
   mydb:
     image: mysql:latest
-    environment:
-      - TZ=Asia/Tokyo
     ports:
       - '3306:3306'
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: test_db
+      MYSQL_DATABASE: sequelize_db
       TZ: 'Asia/Tokyo'
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
@@ -21,7 +19,7 @@ services:
       context: myapp
       dockerfile: ./Dockerfile
     environment:
-      NODE_ENV: develop
+      NODE_ENV: development
     ports:
       - 3000:3000
     volumes:

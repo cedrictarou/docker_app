@@ -14,6 +14,7 @@ const flash = require('express-flash');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const postRouter = require('./routes/post');
+const methodOverride = require('method-override');
 
 // view engine setup
 app.set('view engine', 'ejs');
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(methodOverride('_method'));
 
 // セッション管理
 app.use(
@@ -31,7 +33,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 10 * 1000 },
+    cookie: { maxAge: 100 * 1000 },
   })
 );
 // セッションの設定をしてからpassportの設定をしないと行けない！！

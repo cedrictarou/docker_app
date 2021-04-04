@@ -35,4 +35,36 @@ module.exports = {
       next();
     }
   },
+  validatePostContent: [
+    check('postedTitle')
+      .not()
+      .isEmpty()
+      .withMessage('タイトルを入力してください。'),
+    check('postedText')
+      .isLength({ min: 1, max: 140 })
+      .withMessage('140文字以内にしてください。'),
+  ],
+  doShowPostErrorMsg: (req, res, next) => {
+    // バリデーション
+    const errors = validationResult(req);
+    const postInfo = {
+      // postUser: res.locals.user,
+      postedTitle: req.body.postedTitle,
+      postedText: req.body.postedText,
+    };
+    if (!errors.isEmpty()) {
+      // エラーが有る場合
+      //エラーメッセージズを表示できる形に整形する
+      const errors_msg = errors.array().map((obj) => obj.msg);
+      console.log(errors_msg);
+      res.render('post/create.ejs', {
+        title: 'create',
+        postInfo,
+        errors_msg,
+      });
+      return;
+    } else {
+      next();
+    }
+  },
 };

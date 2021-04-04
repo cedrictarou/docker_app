@@ -17,9 +17,9 @@
   <!-- main content -->
   <main>
     <div class="container">
-      <% if( messages.error ) { %>
+      <% if( errors_msg ) { %>
         <div class="mt-2 alert alert-danger">
-          <%= messages.error %>
+          <%= errors_msg %>
         </div>
         <% } %>
           <% const currentUser=locals.currentUser || {} %>

@@ -9,7 +9,7 @@ module.exports = {
     });
   },
   goToSignupPage: (req, res) => {
-    res.render('account/register.ejs', { title: 'register' });
+    res.render('account/register.ejs', { title: 'register', errors_msg: '' });
   },
   doCheckUser: async (req, res, next) => {
     // ユーザーが既に登録されているかをチェックする
@@ -18,7 +18,6 @@ module.exports = {
       email: req.body.email,
       password: req.body.password,
     };
-    // const errors_msg = [];
     // ユーザーが既に登録されているチェクする
     try {
       const user = await User.findOne({
@@ -49,7 +48,7 @@ module.exports = {
     try {
       const hashedPassword = await bcrypt.hash(currentUser.password, 10);
       // Create a new user
-      const user = await User.create({
+      await User.create({
         username: currentUser.username,
         email: currentUser.email,
         password: hashedPassword,

@@ -27,9 +27,8 @@ passport.use(
       passReqToCallback: true,
     },
     async (req, email, password, done) => {
-      let user;
       try {
-        user = await User.findOne({ where: { email: email } });
+        const user = await User.findOne({ where: { email: email } });
         // hash化されたパスワードが一致するかチェックする
         if (await bcrypt.compare(password, user.password)) {
           // ユーザーを正しく取得できた場合
@@ -62,10 +61,18 @@ const initialize = () => {
     passport.session(),
     function (req, res, next) {
       if (req.user) {
-        res.locals.user = req.user.username;
+        const currentUser = {
+          id: req.user.id,
+          username: req.user.username,
+          email: req.user.email,
+        };
+        res.locals.user = currentUser;
         res.locals.isLoggedIn = true;
       } else {
-        res.locals.user = 'ゲストユーザー';
+        const guestUser = {
+          username: 'ゲストユーザー',
+        };
+        res.locals.user = guestUser;
         res.locals.isLoggedIn = false;
       }
       next();

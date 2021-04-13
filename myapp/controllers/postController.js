@@ -36,24 +36,34 @@ module.exports = {
   editPost: async (req, res, next) => {
     const postId = req.params.id;
     // postIdのtitleとcontentを更新する;
-    await Post.update(
-      {
-        title: req.body.postedTitle,
-        content: req.body.postedText,
-      },
-      { where: { id: postId } }
-    );
-    next();
+    try {
+      await Post.update(
+        {
+          title: req.body.postedTitle,
+          content: req.body.postedText,
+        },
+        { where: { id: postId } }
+      );
+      next();
+    } catch (error) {
+      console.log(error);
+      res.redirect('/post/list');
+    }
   },
   // 記事の削除
   deletePost: async (req, res, next) => {
     const postId = req.params.id;
     // データを削除する
-    await Post.destroy({
-      where: {
-        id: postId,
-      },
-    });
-    next();
+    try {
+      await Post.destroy({
+        where: {
+          id: postId,
+        },
+      });
+      next();
+    } catch (error) {
+      console.log(error);
+      res.redirect('/post/list');
+    }
   },
 };

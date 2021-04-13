@@ -13,9 +13,9 @@ router.get('/edit/:id', auth.verifyToken, postController.showPostView);
 // 記事作成
 router.post(
   '/create',
+  auth.verifyToken,
   validate.validatePostContent,
   validate.doShowPostErrorMsg,
-  auth.verifyToken,
   postController.createPost,
   postController.showListView
 );

@@ -3,7 +3,10 @@ const jwt = require('jsonwebtoken');
 module.exports = {
   createToken: (req, res, next) => {
     const user = { name: req.session.username };
-    const token = jwt.sign(user, process.env.SECRET_KEY);
+    const option = {
+      expiresIn: '10m',
+    };
+    const token = jwt.sign(user, process.env.SECRET_KEY, option);
     req.session.accessToken = token;
     next();
   },

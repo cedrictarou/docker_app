@@ -1,6 +1,6 @@
 'use strict';
 // formを操作する
-// buttonタイプがさsubmitのものを全て取得する
+// buttonタイプがsubmitのものを全て取得する
 const submitBtns = document.querySelectorAll("button[type='submit']");
 // 取得したsubmitBtnsのそれぞれの要素にイベントを追加する
 submitBtns.forEach((submitBtn) => {

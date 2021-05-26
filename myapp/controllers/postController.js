@@ -2,15 +2,56 @@
 const Post = require('../models').Post;
 const User = require('../models').User;
 
+const Sequelize = require('sequelize');
+const config = require('../config/config.json');
+// Sequelize インスタンス
+const sequelize = new Sequelize({
+  dialect: config[process.env.NODE_ENV].dialect,
+});
+
 module.exports = {
   // Listページに飛ぶ
   showListView: async (req, res) => {
-    const posts = await Post.findAll({
-      include: [{ model: User }],
-      // 最新の投稿が上に来るようにする
-      order: [['updatedAt', 'DESC']],
-    });
-    res.render('post/list.ejs', { posts });
+    try {
+      const posts = await Post.findAll({
+        attributes: ['id', 'title', 'content'],
+        include: [
+          {
+            model: User,
+            attributes: ['username'],
+          },
+        ],
+        order: [['updatedAt', 'DESC']],
+      });
+
+      // likeからlikeの数を取得する
+      const likeCounts = await Post.findAll({
+        attributes: [
+          'id',
+          [sequelize.fn('COUNT', sequelize.col('likes.id')), 'cnt_likes'],
+        ],
+        include: [
+          {
+            model: User,
+            as: 'likes',
+            require: true,
+            attributes: [],
+            through: {
+              attributes: [],
+            },
+          },
+        ],
+        group: ['id'],
+        raw: true,
+      });
+      // postsにlikeCountsを合体させる
+      posts.forEach((post, postIndex) => {
+        post.likeCounts = likeCounts[postIndex].cnt_likes;
+      });
+      res.render('post/list.ejs', { posts });
+    } catch (error) {
+      console.log(error);
+    }
   },
   // 記事作成ページ
   showCreateView: (req, res) => {

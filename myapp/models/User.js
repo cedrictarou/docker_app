@@ -12,12 +12,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id',
         sourceKey: 'id',
       });
-      User.belongsToMany(Post, {
-        through: Like,
-        foreignKey: 'user_id',
-        otherKey: 'post_id',
-        as: 'likes',
-      });
+      // User.belongsToMany(Post, {
+      //   through: Like,
+      //   foreignKey: 'user_id',
+      //   otherKey: 'post_id',
+      //   as: 'likes',
+      // });
     }
   }
   User.init(

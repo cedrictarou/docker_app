@@ -1,7 +1,7 @@
 'use strict';
 (() => {
   // formを操作する
-  const submitBtns = document.querySelectorAll('.editBtn, .deleteBtn');
+  const submitBtns = document.querySelectorAll('.actionBtn');
   // 取得したsubmitBtnsのそれぞれの要素にイベントを追加する
   submitBtns.forEach((submitBtn) => {
     submitBtn.addEventListener('click', (event) => {

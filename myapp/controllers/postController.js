@@ -1,29 +1,28 @@
 // ポスト機能のコントローラー
 const Post = require('../models').Post;
 const User = require('../models').User;
-
-const Sequelize = require('sequelize');
-const config = require('../config/config.json');
-// Sequelize インスタンス
-const sequelize = new Sequelize({
-  dialect: config[process.env.NODE_ENV].dialect,
-});
+const { sequelize } = require('../models/index');
 
 module.exports = {
   // Listページに飛ぶ
   showListView: async (req, res) => {
+    // currentUserを取得する
+    const currentUser = res.locals.user;
+
+    console.log(currentUser.id);
+    // トランザクションで行う
+    const transaction = await sequelize.transaction();
     try {
       const posts = await Post.findAll({
         attributes: ['id', 'title', 'content'],
         include: [
           {
             model: User,
-            attributes: ['username'],
           },
         ],
         order: [['updatedAt', 'DESC']],
+        transaction,
       });
-
       // likeからlikeの数を取得する
       const likeCounts = await Post.findAll({
         attributes: [
@@ -43,14 +42,29 @@ module.exports = {
         ],
         group: ['id'],
         raw: true,
+        transaction,
       });
+      await transaction.commit();
       // postsにlikeCountsを合体させる
-      posts.forEach((post, postIndex) => {
-        post.likeCounts = likeCounts[postIndex].cnt_likes;
+      posts.forEach((post) => {
+        likeCounts.forEach((likeCount) => {
+          // currentUser.idとpost.User.idが一致ならpost.isLikedをtrueにする。
+          if (currentUser.id === post.User.id) {
+            post.isLiked = false;
+          } else {
+            post.isLiked = true;
+          }
+          // likeCountの処理
+          if (post.id === likeCount.id) {
+            post.likeCounts = likeCount.cnt_likes;
+          }
+        });
       });
+      console.log(posts);
       res.render('post/list.ejs', { posts });
     } catch (error) {
       console.log(error);
+      await transaction.rollback();
     }
   },
   // 記事作成ページ

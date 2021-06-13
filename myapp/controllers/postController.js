@@ -67,7 +67,6 @@ module.exports = {
             post.id === likeUser.postId
           ) {
             post.isLiked = true;
-          } else {
           }
         });
       });

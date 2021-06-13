@@ -1,38 +1,24 @@
 'use strict';
 (() => {
-  // likeBtnを操作する
+  // likeBtns要素を取得
   const likeBtns = document.querySelectorAll('.likeBtn');
+  // boolean型へ変換する処理
+  function toBoolean(data) {
+    return data.toLowerCase() === 'true';
+  }
+
   likeBtns.forEach((likeBtn) => {
     // likeBtnの表示をture/falseで管理する
-    let isLiked = likeBtn.dataset.is_liked;
-
-    likeBtn.addEventListener('click', () => {
-      // 隣のlikeCountを取得する
-      const likeNumEl = likeBtn.nextElementSibling;
-      let likeNum = parseInt(likeNumEl.textContent);
-      // svgを操作してiconを替える
-      const likeIcon = likeBtn.children;
-      if (isLiked) {
-        // isLikedがtureならfalseでハートを白に替える
-        likeIcon[0].dataset.prefix = 'fas';
-        isLiked = false;
-        likeNum += 1;
-        likeNumEl.textContent = likeNum;
-        return;
-      } else {
-        // isLikedがfalseならtureにしてハートを黒に替える
-        likeIcon[0].dataset.prefix = 'far';
-        isLiked = true;
-        likeNum -= 1;
-        likeNumEl.textContent = likeNum;
-      }
-
-      // fetchでサーバへ送るデータ
-      // post_idを取得する
-      const postId = parseInt(likeBtn.dataset.post_id);
-      const data = {
-        postId,
-      };
+    let isLiked = toBoolean(likeBtn.dataset.is_liked);
+    // svgを操作してiconを替える
+    const likeIcon = likeBtn.children;
+    // 隣のlikeCountを取得する
+    const likeNumEl = likeBtn.nextElementSibling;
+    let likeNum = parseInt(likeNumEl.textContent);
+    const postId = parseInt(likeBtn.dataset.post_id);
+    // fetchでサーバへ送る設定
+    async function sendPostId(postId, action) {
+      const data = { postId };
       // FetchAPIのオプション準備
       const param = {
         method: 'POST',
@@ -42,7 +28,40 @@
         body: JSON.stringify(data),
       };
       // fetchで送る
-      fetch('/like/create', param);
+      const response = await fetch(`/like/${action}`, param);
+      const message = await response.json();
+      if (message === 'no user') {
+        alert('Please Login.');
+        return;
+      } else {
+        // ハートの色を変える処理
+        if (isLiked) {
+          // isLikedがtureならfalseでハートを白に替える
+          isLiked = false;
+          likeNum -= 1;
+          likeIcon[0].dataset.prefix = 'far';
+          likeNumEl.textContent = likeNum;
+        } else {
+          // isLikedがfalseならtureにしてハートを黒に替える
+          likeNum += 1;
+          isLiked = true;
+          likeIcon[0].dataset.prefix = 'fas';
+          likeNumEl.textContent = likeNum;
+        }
+      }
+    }
+
+    likeBtn.addEventListener('click', () => {
+      let action;
+      if (isLiked) {
+        // 削除する処理
+        action = 'destroy';
+        sendPostId(postId, action);
+      } else {
+        // 追加する処理
+        action = 'create';
+        sendPostId(postId, action);
+      }
     });
   });
 })();

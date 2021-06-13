@@ -1,6 +1,7 @@
 // ポスト機能のコントローラー
 const Post = require('../models').Post;
 const User = require('../models').User;
+const Like = require('../models').Like;
 const { sequelize } = require('../models/index');
 
 module.exports = {
@@ -8,8 +9,6 @@ module.exports = {
   showListView: async (req, res) => {
     // currentUserを取得する
     const currentUser = res.locals.user;
-
-    console.log(currentUser.id);
     // トランザクションで行う
     const transaction = await sequelize.transaction();
     try {
@@ -23,8 +22,8 @@ module.exports = {
         order: [['updatedAt', 'DESC']],
         transaction,
       });
-      // likeからlikeの数を取得する
-      const likeCounts = await Post.findAll({
+      // likeからlikeの数を取得する;
+      const countLikes = await Post.findAll({
         attributes: [
           'id',
           [sequelize.fn('COUNT', sequelize.col('likes.id')), 'cnt_likes'],
@@ -44,23 +43,34 @@ module.exports = {
         raw: true,
         transaction,
       });
+      // likeを誰が何に押しているかを取得する
+      const likeUsers = await Like.findAll({
+        attributes: ['userId', 'postId'],
+        raw: true,
+        transaction,
+      });
       await transaction.commit();
+
       // postsにlikeCountsを合体させる
       posts.forEach((post) => {
-        likeCounts.forEach((likeCount) => {
-          // currentUser.idとpost.User.idが一致ならpost.isLikedをtrueにする。
-          if (currentUser.id === post.User.id) {
-            post.isLiked = false;
-          } else {
-            post.isLiked = true;
-          }
+        post.isLiked = false;
+        countLikes.forEach((countLike) => {
           // likeCountの処理
-          if (post.id === likeCount.id) {
-            post.likeCounts = likeCount.cnt_likes;
+          if (post.id === countLike.id) {
+            post.likeCounts = countLike.cnt_likes;
+          }
+        });
+        // ログインしているユーザーがlikeボタンを押していたらlikeを黒色にする処理
+        likeUsers.forEach((likeUser) => {
+          if (
+            currentUser.id === likeUser.userId &&
+            post.id === likeUser.postId
+          ) {
+            post.isLiked = true;
+          } else {
           }
         });
       });
-      console.log(posts);
       res.render('post/list.ejs', { posts });
     } catch (error) {
       console.log(error);

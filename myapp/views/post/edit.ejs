@@ -40,9 +40,9 @@
                       placeholder="140字以内で本文を入力してください。"><%= post.content %> </textarea>
                   </div>
                   <div>
-                    <button type="submit" class="btn btn-primary" data-method="post"
+                    <button type="submit" class="actionBtn btn btn-primary" data-method="post"
                       data-action="<%= `/post/edit/${post.id}?_method=put` %>">完了</button>
-                    <button type="submit" class="btn btn-danger" data-method="get"
+                    <button type="submit" class="actionBtn btn btn-danger" data-method="get"
                       data-action="/post/list">キャンセル</button>
                   </div>
                 </form>

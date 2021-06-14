@@ -1,16 +1,80 @@
 // ポスト機能のコントローラー
 const Post = require('../models').Post;
 const User = require('../models').User;
+const Like = require('../models').Like;
+const { sequelize } = require('../models/index');
 
 module.exports = {
   // Listページに飛ぶ
   showListView: async (req, res) => {
-    const posts = await Post.findAll({
-      include: [{ model: User }],
-      // 最新の投稿が上に来るようにする
-      order: [['updatedAt', 'DESC']],
-    });
-    res.render('post/list.ejs', { posts });
+    // currentUserを取得する
+    const currentUser = res.locals.user;
+    // トランザクションで行う
+    const transaction = await sequelize.transaction();
+    try {
+      const posts = await Post.findAll({
+        attributes: ['id', 'title', 'content'],
+        include: [
+          {
+            model: User,
+          },
+        ],
+        order: [['updatedAt', 'DESC']],
+        transaction,
+      });
+      // likeからlikeの数を取得する;
+      const countLikes = await Post.findAll({
+        attributes: [
+          'id',
+          [sequelize.fn('COUNT', sequelize.col('likes.id')), 'cnt_likes'],
+        ],
+        include: [
+          {
+            model: User,
+            as: 'likes',
+            require: true,
+            attributes: [],
+            through: {
+              attributes: [],
+            },
+          },
+        ],
+        group: ['id'],
+        raw: true,
+        transaction,
+      });
+      // likeを誰が何に押しているかを取得する
+      const likeUsers = await Like.findAll({
+        attributes: ['userId', 'postId'],
+        raw: true,
+        transaction,
+      });
+      await transaction.commit();
+
+      // postsにlikeCountsを合体させる
+      posts.forEach((post) => {
+        post.isLiked = false;
+        countLikes.forEach((countLike) => {
+          // likeCountの処理
+          if (post.id === countLike.id) {
+            post.likeCounts = countLike.cnt_likes;
+          }
+        });
+        // ログインしているユーザーがlikeボタンを押していたらlikeを黒色にする処理
+        likeUsers.forEach((likeUser) => {
+          if (
+            currentUser.id === likeUser.userId &&
+            post.id === likeUser.postId
+          ) {
+            post.isLiked = true;
+          }
+        });
+      });
+      res.render('post/list.ejs', { posts });
+    } catch (error) {
+      console.log(error);
+      await transaction.rollback();
+    }
   },
   // 記事作成ページ
   showCreateView: (req, res) => {

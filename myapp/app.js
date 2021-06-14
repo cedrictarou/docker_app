@@ -14,6 +14,7 @@ const flash = require('express-flash');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const postRouter = require('./routes/post');
+const likeRouter = require('./routes/like');
 const methodOverride = require('method-override');
 
 // view engine setup
@@ -41,6 +42,7 @@ app.use(...accountControl.initialize());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/post', postRouter);
+app.use('/like', likeRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
